@@ -38,3 +38,41 @@ exports.registerUser = async (req, res) => {
         })
     }
 }
+
+exports.loginUser = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        if (!email || !password) {
+            return res.status(400).json({
+                message: "Login successfully",
+                success: true
+            })
+        }
+
+        const user = await userModel.findOne({ email })
+        if (!user) {
+            return res.status(400).json({
+                message: "User not registerd",
+                success: false
+            })
+        }
+
+        const isMatched = await bcrypt.compare(password, user.password)
+        if (!isMatched) {
+            return res.status(400).json({
+                message: "Wrong password "
+            })
+        }
+
+        return res.status(200).json({
+            message: "Login successfully",
+            success: true
+        })
+
+    } catch (error) {
+        return res.status(500).json({
+            message: "Internal server error",
+            success: false
+        })
+    }
+}
