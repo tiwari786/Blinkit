@@ -1,5 +1,6 @@
 const userModel = require("../models/userModel");
-const bcrypt = require("bcrypt")
+const bcrypt = require("bcrypt");
+const genrateToken = require("../utils/genrateToken");
 
 exports.registerUser = async (req, res) => {
     try {
@@ -63,6 +64,16 @@ exports.loginUser = async (req, res) => {
                 message: "Wrong password "
             })
         }
+
+        // token genrate
+        const token = genrateToken(user._id)
+
+        //set token in cookie
+        res.cookie("token", token, {
+            httpOnly: true,
+            sameSite: "strict",
+            secure: false
+        })
 
         return res.status(200).json({
             message: "Login successfully",
