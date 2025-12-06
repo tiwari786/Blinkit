@@ -1,6 +1,6 @@
 const userModel = require("../models/userModel");
 const bcrypt = require("bcrypt");
-const genrateToken = require("../utils/genrateToken");
+const generateToken = require("../utils/generateToken");
 
 exports.registerUser = async (req, res) => {
     try {
@@ -20,13 +20,13 @@ exports.registerUser = async (req, res) => {
             })
         }
 
-        const hasedPassword = await bcrypt.hash(password, 10)
+        const hashedPassword  = await bcrypt.hash(password, 10)
 
         await userModel.create({
-            name, email, password: hasedPassword
+            name, email, password: hashedPassword 
         })
 
-        return res.status(200).json({
+        return res.status(201).json({
             message: "User created successfully",
             success: true
         })
@@ -45,8 +45,8 @@ exports.loginUser = async (req, res) => {
         const { email, password } = req.body;
         if (!email || !password) {
             return res.status(400).json({
-                message: "Login successfully",
-                success: true
+                message: "Provide all fields",
+                success: false
             })
         }
 
@@ -61,12 +61,13 @@ exports.loginUser = async (req, res) => {
         const isMatched = await bcrypt.compare(password, user.password)
         if (!isMatched) {
             return res.status(400).json({
-                message: "Wrong password "
+                message: "Wrong password",
+                success: false
             })
         }
 
         // token genrate
-        const token = genrateToken(user._id)
+        const token = generateToken(user._id)
 
         //set token in cookie
         res.cookie("token", token, {
@@ -75,9 +76,17 @@ exports.loginUser = async (req, res) => {
             secure: false
         })
 
+        const userData = {
+            id: user._id,
+            name: user.name,
+            email: user.email
+        }
+
         return res.status(200).json({
             message: "Login successfully",
-            success: true
+            success: true,
+            token,
+            userData
         })
 
     } catch (error) {
