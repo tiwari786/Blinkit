@@ -1,4 +1,5 @@
 const userModel = require("../models/userModel");
+const bcrypt = require("bcrypt")
 
 exports.registerUser = async (req, res) => {
     try {
@@ -18,8 +19,10 @@ exports.registerUser = async (req, res) => {
             })
         }
 
+        const hasedPassword = await bcrypt.hash(password, 10)
+
         await userModel.create({
-            name, email, password
+            name, email, password: hasedPassword
         })
 
         return res.status(200).json({
